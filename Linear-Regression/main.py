@@ -115,7 +115,7 @@ def main() -> None:
 
     print(theta)
 
-    theta = gradient_descent(X_train, y_train, theta)
+    theta = gradient_descent(X_train, y_train)
     error = evaluate_model(theta, X_test, y_test)
     print(f"Error: {error}")
 
