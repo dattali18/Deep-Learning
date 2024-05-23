@@ -9,9 +9,23 @@ from sklearn.linear_model import LogisticRegression
 def sigmoid(z: np.ndarray) -> np.ndarray:
     return 1 / (1 + np.exp(-z))
 
+#TODO: convert the sigmoid function to use iteration instead of vectorized operations
+def sigmoid_iterative(z: np.ndarray) -> np.ndarray:
+    result = np.zeros(z.shape[0])
+    for i in range(z.shape[0]):
+        result[i] = 1 / (1 + np.exp(-z[i]))
+    return result
+
 
 def loss(h: np.ndarray, y: np.ndarray) -> float:
     return (-y * np.log(h) - (1 - y) * np.log(1 - h)).mean()
+
+#TODO: convert the loss function to use iteration instead of vectorized operations
+def loss_iterative(h: np.ndarray, y: np.ndarray) -> float:
+    result = 0
+    for i in range(h.shape[0]):
+        result += (-y[i] * np.log(h[i]) - (1 - y[i]) * np.log(1 - h[i]))
+    return result / h.shape[0]
 
 
 def predict_probs(X: np.ndarray, theta: np.ndarray) -> np.ndarray:
@@ -123,7 +137,7 @@ def main() -> None:
         X, y, test_size=0.33, random_state=0
     )
 
-    theta, cost_array = train_model(X_train, y_train, theta)
+    theta, cost_array = train_model_iterative(X_train, y_train, theta)
 
     plt.plot(cost_array)
     plt.xlabel("Iterations")
@@ -141,7 +155,6 @@ def main() -> None:
     print(f"accuracy: {accuracy:.2f}%")
 
     print("Coefficients: \n", sk_model.coef_)
-
     print(theta)
 
 if __name__ == "__main__":
