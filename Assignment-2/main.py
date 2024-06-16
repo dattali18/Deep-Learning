@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
 
 class Activation:
@@ -92,7 +93,7 @@ class NN:
     def LogLoss(self, A: np.ndarray, Y: np.ndarray) -> float:
         cost = np.mean(-(Y * np.log(A) + (1 - Y) * np.log(1 - (A))))
         return cost
-    
+
     def sigmoid(self, z: np.ndarray) -> np.ndarray:
         return 1 / (1 + np.exp(-z))
 
@@ -130,6 +131,34 @@ class Functions:
         return np.where(z > 0, 1, 0)
 
 
+def manipulation(df: pd.DataFrame):
+    # data frame manipulation
+
+    # the first line in the df is the logistic regression
+    logistic = df.iloc[0]
+
+    activations = ["tanh", "sigmoid", "relu"]
+    dfs = []
+
+    # add the logistic regression to the df for each pivot for each activation
+    for activation in activations:
+        df_activation = df[df["activation"] == activation]
+
+        # Create a pivot table for test_accuracy
+        df_test = df_activation.pivot(
+            index="hidden_size", columns="epochs", values="test_accuracy"
+        )
+        df_test.loc[0] = logistic["test_accuracy"]
+
+        # Create a pivot table for train_accuracy
+        df_train = df_activation.pivot(
+            index="hidden_size", columns="epochs", values="train_accuracy"
+        )
+        df_train.loc[0] = logistic["train_accuracy"]
+
+        dfs.append((activation, df_train, df_test))
+
+
 def main() -> None:
     url = "https://github.com/rosenfa/nn/blob/master/pima-indians-diabetes.csv?raw=true"
 
@@ -154,12 +183,20 @@ def main() -> None:
 
     hidden_size = [1, 2, 3, 4, 5, 6]
     activation_functions = ["tanh", "sigmoid", "relu"]
-    epochs = [100, 200, 300, 400, 500]
     results = []
 
-    for hidden in hidden_size:
-        for activation in activation_functions:
-            for epoch in epochs:
+    # add logistic for comparison
+    logistic = LogisticRegression()
+    logistic.fit(X_train.T, Y_train)
+    logistic_train_accuracy = logistic.score(X_train.T, Y_train)
+    logistic_test_accuracy = logistic.score(X_test.T, Y_test)
+    results.append(
+        ["NA", "logistic", 0, logistic_train_accuracy, logistic_test_accuracy]
+    )
+
+    for activation in activation_functions:
+        for hidden in hidden_size:
+            for epoch in range(500, 2500, 500):
                 # setting up the neural network
                 nn = NN(X_train.shape[0], 1, hidden)
                 functions = Functions(activation)
@@ -188,6 +225,10 @@ def main() -> None:
     )
     # save the file to the /Assignment-2 folder where the main.py is located
     df.to_csv("results.csv", index=False)
+
+    dfs = manipulation(df)
+
+    # plotting the results
 
 
 if __name__ == "__main__":
