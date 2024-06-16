@@ -73,9 +73,9 @@ class NN:
         self.parameters["b2"] -= self.learning_rate * grads["db2"]
 
     def train(self, X: np.ndarray, Y: np.ndarray, epochs: int) -> None:
-        for i in range(epochs):
+        for _ in range(epochs):
             A, cache = self.forward_propagation(X)
-            cost = self.LogLoss(A, Y)
+            cost = self.LogLoss(A, Y) # TODO: add to cost list and plot
             grads = self.backward_propagation(cache, X, Y)
             self.update_parameters(grads)
             # print(f"Epoch {i+1}/{epochs} - cost: {cost}")

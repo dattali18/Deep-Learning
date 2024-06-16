@@ -1,6 +1,6 @@
 import pandas as pd
 
-def manipulation():
+def main():
     # load the dataset that is in path: Assignment-2/result.csv
     df = pd.read_csv("results.csv")
     # data frame manipulation
