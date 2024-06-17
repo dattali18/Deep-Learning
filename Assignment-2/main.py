@@ -131,7 +131,7 @@ class Functions:
         return np.where(z > 0, 1, 0)
 
 
-def manipulation(df: pd.DataFrame):
+def manipulation(df: pd.DataFrame) -> list[tuple[str, pd.DataFrame, pd.DataFrame]]:
     # data frame manipulation
 
     # the first line in the df is the logistic regression
@@ -158,8 +158,54 @@ def manipulation(df: pd.DataFrame):
 
         dfs.append((activation, df_train, df_test))
 
+    return dfs
+
+import matplotlib.pyplot as plt
+# import seaborn as sns
+
+def plot_results(dfs: list[tuple[str, pd.DataFrame, pd.DataFrame]]) -> None:
+    # the plot need to be a line plot with the x-axis being the number of epochs
+    # plotting the results
+    for activation, df_train, df_test in dfs:
+        # a bar plot that has both the train and test accuracy
+        # and the x-axis is the number of epochs
+        plt.figure(figsize=(10, 5))
+        plt.subplot(1, 2, 1)
+        sns.heatmap(df_train, annot=True, fmt=".2f", cmap="coolwarm")
+        plt.title(f"Train Accuracy - {activation}")
+        plt.xlabel("Epochs")
+        plt.ylabel("Hidden Size")
+
+        plt.subplot(1, 2, 2)
+        sns.heatmap(df_test, annot=True, fmt=".2f", cmap="coolwarm")
+        plt.title(f"Test Accuracy - {activation}")
+        plt.xlabel("Epochs")
+        plt.ylabel("Hidden Size")
+
+        plt.tight_layout()
+        plt.show()
+
+def print_results(dfs: list[tuple[str, pd.DataFrame, pd.DataFrame]]) -> None:
+    for activation, df_train, df_test in dfs:
+        print(f"Activation: {activation}")
+        print("Train Accuracy")
+        print(df_train)
+        print("Test Accuracy")
+        print(df_test)
+
+import os
 
 def main() -> None:
+
+    # loading the data
+    # if the result.csv file is in the same folder as the main.py file load it
+    if "results.csv" in os.listdir():
+        df = pd.read_csv("results.csv")
+        dfs = manipulation(df)
+        plot_results(dfs)
+        print_results(dfs)
+        return
+
     url = "https://github.com/rosenfa/nn/blob/master/pima-indians-diabetes.csv?raw=true"
 
     df = pd.read_csv(url, header=0)
@@ -191,7 +237,7 @@ def main() -> None:
     logistic_train_accuracy = logistic.score(X_train.T, Y_train)
     logistic_test_accuracy = logistic.score(X_test.T, Y_test)
     results.append(
-        ["NA", "logistic", 0, logistic_train_accuracy, logistic_test_accuracy]
+        ["NA", "logistic", "Logistic", logistic_train_accuracy, logistic_test_accuracy]
     )
 
     for activation in activation_functions:
@@ -229,6 +275,10 @@ def main() -> None:
     dfs = manipulation(df)
 
     # plotting the results
+    plot_results(dfs)
+
+    # print the results
+    print_results(dfs)
 
 
 if __name__ == "__main__":
